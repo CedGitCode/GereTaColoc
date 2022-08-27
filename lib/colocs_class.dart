@@ -1,5 +1,6 @@
 class Colocs {
-  int? id;
+
+  String? id;
   String? name;
 
   Colocs(this.id, this.name);

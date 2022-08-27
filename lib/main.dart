@@ -1,6 +1,12 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:gere_ta_coloc/article.dart';
 import 'package:flutter/services.dart';
+import 'package:gere_ta_coloc/colocs_class.dart';
+import 'package:gere_ta_coloc/file_manager.dart';
+import 'package:uuid/uuid.dart';
 
 void main() {
   runApp(const MyApp());
@@ -45,6 +51,53 @@ class _MyHomePage extends State<MyHomePage> {
     });
   }
 
+  void writeColocToJson(String name) async
+  {
+    File file = await FileManager.getLocalFile("colocs.json");
+    var uuid = Uuid();
+    Map<String, dynamic> _json = {};
+    Map<String, dynamic> _newJson = {uuid.v4(): name};
+    String _jsonString;
+
+
+    if(await file.exists())
+    {
+      _jsonString = await file.readAsString();
+      _json = jsonDecode(_jsonString);
+      _json.addAll(_newJson);
+      _jsonString = jsonEncode(_json);
+    }
+    else
+    {
+      _jsonString = jsonEncode(_newJson);
+    }
+
+    file.writeAsString(_jsonString);
+
+  }
+
+  void readColocFromJson() async
+  {
+    File file = await FileManager.getLocalFile("colocs.json");
+    Map<String, dynamic> _json = {};
+    String _jsonString;
+    if(await file.exists()) {
+      _jsonString = await file.readAsString();
+      _json = jsonDecode(_jsonString);
+
+      _json.forEach((key, value) {
+        addingColocataireInListView(value);
+      });
+    }
+  }
+
+  @override
+  void initState()
+  {
+    super.initState();
+    readColocFromJson();//call it over here
+  }
+
   @override
   void dispose() {
     myTextController.dispose();
@@ -83,7 +136,10 @@ class _MyHomePage extends State<MyHomePage> {
                       ),
                     ),
                     ElevatedButton(
-                        onPressed:() => addingColocataireInListView(myTextController.text),
+                        onPressed:() {
+                          addingColocataireInListView(myTextController.text);
+                          writeColocToJson(myTextController.text);
+                        },
                         child:const Text("Ajouter")
                     )
                   ]
