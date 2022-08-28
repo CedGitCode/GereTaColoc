@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gere_ta_coloc/article.dart';
 import 'package:flutter/services.dart';
@@ -104,6 +105,8 @@ class _MyHomePage extends State<MyHomePage> {
     super.dispose();
   }
 
+  bool isChecked = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -158,7 +161,15 @@ class _MyHomePage extends State<MyHomePage> {
                         listViewColocataire[index],
                         textAlign: TextAlign.center,
                         style: const TextStyle(fontWeight: FontWeight.bold),
-                      )
+                      ),
+                      trailing: IconButton(
+                          icon: const Icon(Icons.cancel, color: Colors.red,),
+                          onPressed: () {
+                            setState(() {
+                              listViewColocataire.removeAt(index);
+                            });
+                          }
+                      ),
                     );
                   },
                 )
@@ -174,13 +185,75 @@ class _MyHomePage extends State<MyHomePage> {
             itemCount: listViewArticle.length,
             separatorBuilder: (context, index) => const Divider(),
             itemBuilder: (context, index) {
+              List nameofColoc = listViewArticle[index].colocataire.keys.toList();
+
               return ListTile(
+                onTap: () => {
+                  showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return StatefulBuilder(
+                            builder: (context, StateSetter setState) {
+                              return AlertDialog (
+                                    title:Text("Colocataires"),
+                                    content: ListView.separated(
+                                        itemBuilder: (BuildContext context, int colocIndex) {
+                                          return Row(
+                                            children: [
+                                              Checkbox(
+                                                value: listViewArticle[index].colocataire[nameofColoc[colocIndex]],
+                                                onChanged: (bool? value) {
+                                                  setState(() {
+                                                    listViewArticle[index].colocataire[nameofColoc[colocIndex]] = value!;
+                                                  });
+                                                  },
+                                              ),
+                                              Text(
+                                                  nameofColoc[colocIndex]
+                                              )
+                                            ],
+                                          );
+                                        },
+                                        separatorBuilder: (BuildContext context, int index) => const Divider(),
+                                        itemCount: listViewColocataire.length
+                                    ),
+                                    actions: <Widget>[
+                                      TextButton(
+                                          onPressed: () => Navigator.pop(context, 'Cancel'),
+                                          child: const Text("Annuler")
+                                      )
+                                    ],
+                              );
+                            }
+                        );
+                      }
+                  )
+                },
+                leading: Container(
+                  alignment: Alignment.center,
+                  height: 30,
+                  width: 30,
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(50),
+                  ),
+                  child:Text("${listViewColocataire.length}", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+                ),
+
                 title:Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       Text(listViewArticle[index].name),
                       Text(listViewArticle[index].price + '\$')
                   ]
+                ),
+                trailing: IconButton(
+                  icon: const Icon(Icons.cancel, color: Colors.black),
+                  onPressed: () {
+                    setState(() {
+                      listViewArticle.removeAt(index);
+                    });
+                  }
                 )
               );
             },
@@ -207,7 +280,6 @@ class _MyHomePage extends State<MyHomePage> {
                       const SizedBox(height: 15),
                       TextField(
                         keyboardType: TextInputType.numberWithOptions(decimal: true),
-                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                         controller: priceTextController,
                         decoration: const InputDecoration(
                             border: OutlineInputBorder(),
@@ -226,7 +298,13 @@ class _MyHomePage extends State<MyHomePage> {
                     onPressed: () => {
                       Navigator.pop(context, 'OK'),
                       setState(() {
-                          listViewArticle.add(Article(nameTextController.text, priceTextController.text) );
+                          Map<String, bool> colocataire = {};
+
+                          listViewColocataire.forEach((element) {
+                            colocataire[element] = false;
+                          });
+
+                          listViewArticle.add(Article(nameTextController.text, priceTextController.text, colocataire) );
                       })
                     },
                     child: const Text('Ajouter'),
