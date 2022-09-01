@@ -6,8 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:gere_ta_coloc/article.dart';
 import 'package:flutter/services.dart';
 import 'package:gere_ta_coloc/colocs_class.dart';
-import 'package:gere_ta_coloc/file_manager.dart';
-import 'package:uuid/uuid.dart';
+import 'package:gere_ta_coloc/data_manager.dart';
 
 void main() {
   runApp(const MyApp());
@@ -35,6 +34,8 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePage extends State<MyHomePage> {
 
+  bool actuallyLoading = false;
+
   List<Widget> listViewChildren = [];
   List<Article> listViewArticle = [];
   List<String> listViewColocataire = [];
@@ -52,51 +53,17 @@ class _MyHomePage extends State<MyHomePage> {
     });
   }
 
-  void writeColocToJson(String name) async
-  {
-    File file = await FileManager.getLocalFile("colocs.json");
-    var uuid = Uuid();
-    Map<String, dynamic> _json = {};
-    Map<String, dynamic> _newJson = {uuid.v4(): name};
-    String _jsonString;
-
-
-    if(await file.exists())
-    {
-      _jsonString = await file.readAsString();
-      _json = jsonDecode(_jsonString);
-      _json.addAll(_newJson);
-      _jsonString = jsonEncode(_json);
-    }
-    else
-    {
-      _jsonString = jsonEncode(_newJson);
-    }
-
-    file.writeAsString(_jsonString);
-
-  }
-
-  void readColocFromJson() async
-  {
-    File file = await FileManager.getLocalFile("colocs.json");
-    Map<String, dynamic> _json = {};
-    String _jsonString;
-    if(await file.exists()) {
-      _jsonString = await file.readAsString();
-      _json = jsonDecode(_jsonString);
-
-      _json.forEach((key, value) {
-        addingColocataireInListView(value);
-      });
-    }
-  }
 
   @override
   void initState()
   {
     super.initState();
-    readColocFromJson();//call it over here
+    Future<List<String>> futurelist = DataManager.readColocFromJson();
+    futurelist.then((value) {
+      if (value != null) value.forEach((item) => listViewColocataire.add(item));
+      actuallyLoading = true;
+      setState(() {});
+    });
   }
 
   @override
@@ -109,70 +76,73 @@ class _MyHomePage extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    if (actuallyLoading) {
+      return Scaffold(
         drawer: Drawer(
-          child:Column(
+          child: Column(
             children: <Widget>[
               DrawerHeader(
                 decoration: const BoxDecoration(
                   color: Colors.blue,
                 ),
-                child:Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children:  <Widget>[
-                    const Padding(
-                      padding:EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 13.0),
-                      child:Text("Ajoute ton colocataire:"),
-                    ),
-                    TextField(
-                      controller: myTextController,
-                      obscureText: false,
-                      cursorColor: Colors.black,
-                      keyboardType: TextInputType.visiblePassword,
-                      decoration:const InputDecoration(
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(width: 1, color: Colors.black),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(width: 1, color: Colors.black),
+                child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      const Padding(
+                        padding: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 13.0),
+                        child: Text("Ajoute ton colocataire:"),
+                      ),
+                      TextField(
+                        controller: myTextController,
+                        obscureText: false,
+                        cursorColor: Colors.black,
+                        keyboardType: TextInputType.visiblePassword,
+                        decoration: const InputDecoration(
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(width: 1, color: Colors
+                                .black),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(width: 1, color: Colors
+                                .black),
+                          ),
                         ),
                       ),
-                    ),
-                    ElevatedButton(
-                        onPressed:() {
-                          addingColocataireInListView(myTextController.text);
-                          writeColocToJson(myTextController.text);
-                        },
-                        child:const Text("Ajouter")
-                    )
-                  ]
+                      ElevatedButton(
+                          onPressed: () {
+                            addingColocataireInListView(myTextController.text);
+                            DataManager.writeColocToJson(myTextController.text);
+                          },
+                          child: const Text("Ajouter")
+                      )
+                    ]
                 ),
               ),
 
               Expanded(
-                child:ListView.separated(
-                  scrollDirection: Axis.vertical,
-                  shrinkWrap: true,
-                  itemCount: listViewColocataire.length,
-                  separatorBuilder: (context, index) => const Divider(),
-                  itemBuilder: (context, index) {
-                    return ListTile(
-                      title:Text(
-                        listViewColocataire[index],
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      trailing: IconButton(
-                          icon: const Icon(Icons.cancel, color: Colors.red,),
-                          onPressed: () {
-                            setState(() {
-                              listViewColocataire.removeAt(index);
-                            });
-                          }
-                      ),
-                    );
-                  },
-                )
+                  child: ListView.separated(
+                    scrollDirection: Axis.vertical,
+                    shrinkWrap: true,
+                    itemCount: listViewColocataire.length,
+                    separatorBuilder: (context, index) => const Divider(),
+                    itemBuilder: (context, index) {
+                      return ListTile(
+                        title: Text(
+                          listViewColocataire[index],
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        trailing: IconButton(
+                            icon: const Icon(Icons.cancel, color: Colors.red,),
+                            onPressed: () {
+                              setState(() {
+                                listViewColocataire.removeAt(index);
+                              });
+                            }
+                        ),
+                      );
+                    },
+                  )
               )
             ],
           ),
@@ -180,33 +150,39 @@ class _MyHomePage extends State<MyHomePage> {
         appBar: AppBar(
           title: const Text("Gère ta Coloc"),
         ),
-        body:SafeArea(
-          child:ListView.separated(
-            itemCount: listViewArticle.length,
-            separatorBuilder: (context, index) => const Divider(),
-            itemBuilder: (context, index) {
-              List nameofColoc = listViewArticle[index].colocataire.keys.toList();
+        body: SafeArea(
+            child: ListView.separated(
+              itemCount: listViewArticle.length,
+              separatorBuilder: (context, index) => const Divider(),
+              itemBuilder: (context, index) {
+                List nameofColoc = listViewArticle[index].colocataire.keys
+                    .toList();
 
-              return ListTile(
-                onTap: () => {
-                  showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return StatefulBuilder(
-                            builder: (context, StateSetter setState) {
-                              return AlertDialog (
-                                    title:Text("Colocataires"),
+                return ListTile(
+                    onTap: () =>
+                    {
+                      showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return StatefulBuilder(
+                                builder: (context, StateSetter setState) {
+                                  return AlertDialog(
+                                    title: Text("Colocataires"),
                                     content: ListView.separated(
-                                        itemBuilder: (BuildContext context, int colocIndex) {
+                                        itemBuilder: (BuildContext context,
+                                            int colocIndex) {
                                           return Row(
                                             children: [
                                               Checkbox(
-                                                value: listViewArticle[index].colocataire[nameofColoc[colocIndex]],
+                                                value: listViewArticle[index]
+                                                    .colocataire[nameofColoc[colocIndex]],
                                                 onChanged: (bool? value) {
                                                   setState(() {
-                                                    listViewArticle[index].colocataire[nameofColoc[colocIndex]] = value!;
+                                                    listViewArticle[index]
+                                                        .colocataire[nameofColoc[colocIndex]] =
+                                                    value!;
                                                   });
-                                                  },
+                                                },
                                               ),
                                               Text(
                                                   nameofColoc[colocIndex]
@@ -214,110 +190,126 @@ class _MyHomePage extends State<MyHomePage> {
                                             ],
                                           );
                                         },
-                                        separatorBuilder: (BuildContext context, int index) => const Divider(),
+                                        separatorBuilder: (BuildContext context,
+                                            int index) => const Divider(),
                                         itemCount: listViewColocataire.length
                                     ),
                                     actions: <Widget>[
                                       TextButton(
-                                          onPressed: () => Navigator.pop(context, 'Cancel'),
+                                          onPressed: () =>
+                                              Navigator.pop(context, 'Cancel'),
                                           child: const Text("Annuler")
                                       )
                                     ],
-                              );
-                            }
-                        );
-                      }
-                  )
-                },
-                leading: Container(
-                  alignment: Alignment.center,
-                  height: 30,
-                  width: 30,
-                  decoration: BoxDecoration(
-                    color: Colors.black,
-                    borderRadius: BorderRadius.circular(50),
-                  ),
-                  child:Text("${listViewColocataire.length}", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-                ),
+                                  );
+                                }
+                            );
+                          }
+                      )
+                    },
+                    leading: Container(
+                      alignment: Alignment.center,
+                      height: 30,
+                      width: 30,
+                      decoration: BoxDecoration(
+                        color: Colors.black,
+                        borderRadius: BorderRadius.circular(50),
+                      ),
+                      child: Text("${listViewColocataire.length}",
+                          style: TextStyle(fontWeight: FontWeight.bold,
+                              color: Colors.white)),
+                    ),
 
-                title:Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Text(listViewArticle[index].name),
-                      Text(listViewArticle[index].price + '\$')
-                  ]
-                ),
-                trailing: IconButton(
-                  icon: const Icon(Icons.cancel, color: Colors.black),
-                  onPressed: () {
-                    setState(() {
-                      listViewArticle.removeAt(index);
-                    });
-                  }
-                )
-              );
-            },
-          )
+                    title: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Text(listViewArticle[index].name),
+                          Text(listViewArticle[index].price + '\$')
+                        ]
+                    ),
+                    trailing: IconButton(
+                        icon: const Icon(Icons.cancel, color: Colors.black),
+                        onPressed: () {
+                          setState(() {
+                            listViewArticle.removeAt(index);
+                          });
+                        }
+                    )
+                );
+              },
+            )
         ),
         floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            showDialog<String>(
-              context: context,
-              builder: (BuildContext context) => AlertDialog(
-                title: const Text('Ajout Article'),
-                content: SingleChildScrollView(
-                  reverse: true,
-                  padding: EdgeInsets.all(50),
-                  child:Column(
-                    children: [
-                      TextField(
-                        controller: nameTextController,
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          labelText: 'Nom de l\'article',
-                        ),
+            onPressed: () {
+              showDialog<String>(
+                context: context,
+                builder: (BuildContext context) =>
+                    AlertDialog(
+                      title: const Text('Ajout Article'),
+                      content: SingleChildScrollView(
+                          reverse: true,
+                          padding: EdgeInsets.all(50),
+                          child: Column(
+                            children: [
+                              TextField(
+                                controller: nameTextController,
+                                decoration: const InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  labelText: 'Nom de l\'article',
+                                ),
+                              ),
+                              const SizedBox(height: 15),
+                              TextField(
+                                keyboardType: TextInputType.numberWithOptions(
+                                    decimal: true),
+                                controller: priceTextController,
+                                decoration: const InputDecoration(
+                                    border: OutlineInputBorder(),
+                                    labelText: 'Prix'
+                                ),
+                              ),
+                            ],
+                          )
                       ),
-                      const SizedBox(height: 15),
-                      TextField(
-                        keyboardType: TextInputType.numberWithOptions(decimal: true),
-                        controller: priceTextController,
-                        decoration: const InputDecoration(
-                            border: OutlineInputBorder(),
-                            labelText: 'Prix'
+                      actions: <Widget>[
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, 'Cancel'),
+                          child: const Text('Annuler'),
                         ),
-                      ),
-                    ],
-                  )
-                ),
-                actions: <Widget>[
-                  TextButton(
-                    onPressed: () => Navigator.pop(context, 'Cancel'),
-                    child: const Text('Annuler'),
-                  ),
-                  TextButton(
-                    onPressed: () => {
-                      Navigator.pop(context, 'OK'),
-                      setState(() {
-                          Map<String, bool> colocataire = {};
+                        TextButton(
+                          onPressed: () =>
+                          {
+                            Navigator.pop(context, 'OK'),
+                            setState(() {
+                              Map<String, bool> colocataire = {};
 
-                          listViewColocataire.forEach((element) {
-                            colocataire[element] = false;
-                          });
+                              listViewColocataire.forEach((element) {
+                                colocataire[element] = false;
+                              });
 
-                          listViewArticle.add(Article(nameTextController.text, priceTextController.text, colocataire) );
-                      })
-                    },
-                    child: const Text('Ajouter'),
-                  ),
-                ],
+                              listViewArticle.add(Article(
+                                  nameTextController.text,
+                                  priceTextController.text, colocataire));
+                            })
+                          },
+                          child: const Text('Ajouter'),
+                        ),
+                      ],
 
-              ),
-            );
-            //Navigator.push(context, MaterialPageRoute(builder: (context) => Article()) );
-          },
-          tooltip: 'Ajout Nourritures',
-          child: const Icon(Icons.add)
+                    ),
+              );
+              //Navigator.push(context, MaterialPageRoute(builder: (context) => Article()) );
+            },
+            tooltip: 'Ajout Nourritures',
+            child: const Icon(Icons.add)
         ),
-    );
+      );
+    }
+    else {
+      return Scaffold(
+        body:Text("JE CHARGE CONNARD \n"),
+      );
+    }
+
   }
 }
