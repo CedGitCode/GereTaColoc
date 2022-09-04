@@ -4,7 +4,7 @@ class Article {
 
   String name;
   String price;
-  Map<String, bool?> colocataire = {};
+  Map<String, dynamic?> colocataire = {};
 
   Article(this.name, this.price, this.colocataire);
 }

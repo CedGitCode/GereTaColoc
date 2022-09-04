@@ -3,10 +3,12 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:gere_ta_coloc/achats_class.dart';
 import 'package:gere_ta_coloc/article.dart';
 import 'package:flutter/services.dart';
 import 'package:gere_ta_coloc/colocs_class.dart';
 import 'package:gere_ta_coloc/data_manager.dart';
+import 'package:gere_ta_coloc/db_handler.dart';
 
 void main() {
   runApp(const MyApp());
@@ -44,11 +46,12 @@ class _MyHomePage extends State<MyHomePage> {
   final nameTextController = TextEditingController();
   final priceTextController = TextEditingController();
 
-  void addingColocataireInListView(String textTyped) {
+  void addingColocataire(String textTyped) {
     if (textTyped.isEmpty) return;
     if (listViewColocataire.contains(textTyped)) return;
 
     setState(() {
+      DataManager.InsertColocs(textTyped);
       listViewColocataire.add(textTyped);
     });
   }
@@ -58,9 +61,11 @@ class _MyHomePage extends State<MyHomePage> {
   void initState()
   {
     super.initState();
-    Future<List<String>> futurelist = DataManager.readColocFromJson();
+    DataManager.fetchColocsFromDB();
+
+    Future<List<Map<String, Object?>>?> futurelist = DataManager.fetchColocsFromDB();
     futurelist.then((value) {
-      if (value != null) value.forEach((item) => listViewColocataire.add(item));
+      if (value != null) value.forEach((item) => listViewColocataire.add(item.values.toString().replaceAll('(', '').replaceAll(')','')));
       actuallyLoading = true;
       setState(() {});
     });
@@ -110,8 +115,7 @@ class _MyHomePage extends State<MyHomePage> {
                       ),
                       ElevatedButton(
                           onPressed: () {
-                            addingColocataireInListView(myTextController.text);
-                            DataManager.writeColocToJson(myTextController.text);
+                            addingColocataire(myTextController.text);
                           },
                           child: const Text("Ajouter")
                       )
@@ -136,6 +140,7 @@ class _MyHomePage extends State<MyHomePage> {
                             icon: const Icon(Icons.cancel, color: Colors.red,),
                             onPressed: () {
                               setState(() {
+                                DataManager.DeleteColocs(listViewColocataire[index]);
                                 listViewColocataire.removeAt(index);
                               });
                             }
@@ -290,6 +295,7 @@ class _MyHomePage extends State<MyHomePage> {
                               listViewArticle.add(Article(
                                   nameTextController.text,
                                   priceTextController.text, colocataire));
+                              DataManager.InsertAchats(nameTextController.text, priceTextController.text, "colocs");
                             })
                           },
                           child: const Text('Ajouter'),
@@ -307,7 +313,7 @@ class _MyHomePage extends State<MyHomePage> {
     }
     else {
       return Scaffold(
-        body:Text("JE CHARGE CONNARD \n"),
+        body:Text("JE CHARGE CONNARD GROS FILS DE PUTE \n"),
       );
     }
 
