@@ -1,14 +1,9 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:gere_ta_coloc/achats_class.dart';
 import 'package:gere_ta_coloc/article.dart';
 import 'package:flutter/services.dart';
-import 'package:gere_ta_coloc/colocs_class.dart';
 import 'package:gere_ta_coloc/data_manager.dart';
-import 'package:gere_ta_coloc/db_handler.dart';
+import 'package:gere_ta_coloc/views/leftView_colocataire.dart';
 
 void main() {
   runApp(const MyApp());
@@ -40,22 +35,11 @@ class _MyHomePage extends State<MyHomePage> {
 
   List<Widget> listViewChildren = [];
   List<Article> listViewArticle = [];
-  List<String> listViewColocataire = [];
+  List<String> listColocataire = [];
 
-  final myTextController = TextEditingController();
+
   final nameTextController = TextEditingController();
   final priceTextController = TextEditingController();
-
-  void addingColocataire(String textTyped) {
-    if (textTyped.isEmpty) return;
-    if (listViewColocataire.contains(textTyped)) return;
-
-    setState(() {
-      DataManager.InsertColocs(textTyped);
-      listViewColocataire.add(textTyped);
-    });
-  }
-
 
   @override
   void initState()
@@ -65,7 +49,7 @@ class _MyHomePage extends State<MyHomePage> {
 
     Future<List<Map<String, Object?>>?> futurelist = DataManager.fetchColocsFromDB();
     futurelist.then((value) {
-      if (value != null) value.forEach((item) => listViewColocataire.add(item.values.toString().replaceAll('(', '').replaceAll(')','')));
+      if (value != null) value.forEach((item) => listColocataire.add(item.values.toString().replaceAll('(', '').replaceAll(')','')));
       actuallyLoading = true;
       setState(() {});
     });
@@ -73,7 +57,8 @@ class _MyHomePage extends State<MyHomePage> {
 
   @override
   void dispose() {
-    myTextController.dispose();
+    nameTextController.dispose();
+    priceTextController.dispose();
     super.dispose();
   }
 
@@ -83,75 +68,7 @@ class _MyHomePage extends State<MyHomePage> {
   Widget build(BuildContext context) {
     if (actuallyLoading) {
       return Scaffold(
-        drawer: Drawer(
-          child: Column(
-            children: <Widget>[
-              DrawerHeader(
-                decoration: const BoxDecoration(
-                  color: Colors.blue,
-                ),
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      const Padding(
-                        padding: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 13.0),
-                        child: Text("Ajoute ton colocataire:"),
-                      ),
-                      TextField(
-                        controller: myTextController,
-                        obscureText: false,
-                        cursorColor: Colors.black,
-                        keyboardType: TextInputType.visiblePassword,
-                        decoration: const InputDecoration(
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(width: 1, color: Colors
-                                .black),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(width: 1, color: Colors
-                                .black),
-                          ),
-                        ),
-                      ),
-                      ElevatedButton(
-                          onPressed: () {
-                            addingColocataire(myTextController.text);
-                          },
-                          child: const Text("Ajouter")
-                      )
-                    ]
-                ),
-              ),
-
-              Expanded(
-                  child: ListView.separated(
-                    scrollDirection: Axis.vertical,
-                    shrinkWrap: true,
-                    itemCount: listViewColocataire.length,
-                    separatorBuilder: (context, index) => const Divider(),
-                    itemBuilder: (context, index) {
-                      return ListTile(
-                        title: Text(
-                          listViewColocataire[index],
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        trailing: IconButton(
-                            icon: const Icon(Icons.cancel, color: Colors.red,),
-                            onPressed: () {
-                              setState(() {
-                                DataManager.DeleteColocs(listViewColocataire[index]);
-                                listViewColocataire.removeAt(index);
-                              });
-                            }
-                        ),
-                      );
-                    },
-                  )
-              )
-            ],
-          ),
-        ),
+        drawer:leftViewColocataire(listColocataire: listColocataire),
         appBar: AppBar(
           title: const Text("Gère ta Coloc"),
         ),
@@ -197,7 +114,7 @@ class _MyHomePage extends State<MyHomePage> {
                                         },
                                         separatorBuilder: (BuildContext context,
                                             int index) => const Divider(),
-                                        itemCount: listViewColocataire.length
+                                        itemCount: listColocataire.length
                                     ),
                                     actions: <Widget>[
                                       TextButton(
@@ -220,7 +137,7 @@ class _MyHomePage extends State<MyHomePage> {
                         color: Colors.black,
                         borderRadius: BorderRadius.circular(50),
                       ),
-                      child: Text("${listViewColocataire.length}",
+                      child: Text("${listColocataire.length}",
                           style: TextStyle(fontWeight: FontWeight.bold,
                               color: Colors.white)),
                     ),
@@ -288,7 +205,7 @@ class _MyHomePage extends State<MyHomePage> {
                             setState(() {
                               Map<String, bool> colocataire = {};
 
-                              listViewColocataire.forEach((element) {
+                              listColocataire.forEach((element) {
                                 colocataire[element] = false;
                               });
 
