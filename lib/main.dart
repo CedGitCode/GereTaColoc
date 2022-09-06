@@ -4,6 +4,8 @@ import 'package:gere_ta_coloc/article.dart';
 import 'package:flutter/services.dart';
 import 'package:gere_ta_coloc/data_manager.dart';
 import 'package:gere_ta_coloc/views/leftView_colocataire.dart';
+import "package:provider/provider.dart";
+import "package:gere_ta_coloc/views/articleViews.dart";
 
 void main() {
   runApp(const MyApp());
@@ -15,8 +17,16 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home:const MyHomePage(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(
+          value:Article(" ", " ", {}),
+        )
+      ],
+      child: MaterialApp(
+        title:"Gère ta coloc",
+        home:MyHomePage(),
+      ),
     );
   }
 }
@@ -55,6 +65,10 @@ class _MyHomePage extends State<MyHomePage> {
     });
   }
 
+  void updateViews() {
+    setState(() {});
+  }
+
   @override
   void dispose() {
     nameTextController.dispose();
@@ -68,99 +82,11 @@ class _MyHomePage extends State<MyHomePage> {
   Widget build(BuildContext context) {
     if (actuallyLoading) {
       return Scaffold(
-        drawer:leftViewColocataire(listColocataire: listColocataire),
+        drawer: leftViewColocataire(listColocataire: listColocataire, listArticle: listViewArticle, updateViews: updateViews,),
         appBar: AppBar(
           title: const Text("Gère ta Coloc"),
         ),
-        body: SafeArea(
-            child: ListView.separated(
-              itemCount: listViewArticle.length,
-              separatorBuilder: (context, index) => const Divider(),
-              itemBuilder: (context, index) {
-                List nameofColoc = listViewArticle[index].colocataire.keys
-                    .toList();
-
-                return ListTile(
-                    onTap: () =>
-                    {
-                      showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return StatefulBuilder(
-                                builder: (context, StateSetter setState) {
-                                  return AlertDialog(
-                                    title: Text("Colocataires"),
-                                    content: ListView.separated(
-                                        itemBuilder: (BuildContext context,
-                                            int colocIndex) {
-                                          return Row(
-                                            children: [
-                                              Checkbox(
-                                                value: listViewArticle[index]
-                                                    .colocataire[nameofColoc[colocIndex]],
-                                                onChanged: (bool? value) {
-                                                  setState(() {
-                                                    listViewArticle[index]
-                                                        .colocataire[nameofColoc[colocIndex]] =
-                                                    value!;
-                                                  });
-                                                },
-                                              ),
-                                              Text(
-                                                  nameofColoc[colocIndex]
-                                              )
-                                            ],
-                                          );
-                                        },
-                                        separatorBuilder: (BuildContext context,
-                                            int index) => const Divider(),
-                                        itemCount: listColocataire.length
-                                    ),
-                                    actions: <Widget>[
-                                      TextButton(
-                                          onPressed: () =>
-                                              Navigator.pop(context, 'Cancel'),
-                                          child: const Text("Annuler")
-                                      )
-                                    ],
-                                  );
-                                }
-                            );
-                          }
-                      )
-                    },
-                    leading: Container(
-                      alignment: Alignment.center,
-                      height: 30,
-                      width: 30,
-                      decoration: BoxDecoration(
-                        color: Colors.black,
-                        borderRadius: BorderRadius.circular(50),
-                      ),
-                      child: Text("${listColocataire.length}",
-                          style: TextStyle(fontWeight: FontWeight.bold,
-                              color: Colors.white)),
-                    ),
-
-                    title: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Text(listViewArticle[index].name),
-                          Text(listViewArticle[index].price + '\$')
-                        ]
-                    ),
-                    trailing: IconButton(
-                        icon: const Icon(Icons.cancel, color: Colors.black),
-                        onPressed: () {
-                          setState(() {
-                            listViewArticle.removeAt(index);
-                          });
-                        }
-                    )
-                );
-              },
-            )
-        ),
+        body:articleViews(listArticle: listViewArticle),
         floatingActionButton: FloatingActionButton(
             onPressed: () {
               showDialog<String>(
