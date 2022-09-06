@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
-class Article {
+class Article extends ChangeNotifier {
 
   String name;
   String price;
   Map<String, bool> colocataire = {};
+  int _numberofColocataire = 0;
 
   int getColoc() {
     List<bool> nbrColoc = colocataire.values.toList();
@@ -18,5 +19,17 @@ class Article {
     return index;
   }
 
-  Article(this.name, this.price, this.colocataire);
+  int get numberColocataire {
+    return _numberofColocataire;
+  }
+
+  void updateNumberColocataire() {
+    _numberofColocataire = colocataire.length;
+    notifyListeners();
+  }
+
+
+  Article(this.name, this.price, this.colocataire) {
+    updateNumberColocataire();
+  }
 }
