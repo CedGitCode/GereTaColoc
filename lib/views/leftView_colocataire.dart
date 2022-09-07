@@ -1,10 +1,16 @@
 import "package:flutter/material.dart";
+import "package:provider/provider.dart";
+
 import "package:gere_ta_coloc/data_manager.dart";
+import "package:gere_ta_coloc/article.dart";
+import "package:gere_ta_coloc/views/articleViews.dart";
 
 class leftViewColocataire extends StatefulWidget {
-  const leftViewColocataire({Key? key, required List<String> this.listColocataire }) : super(key: key);
+  const leftViewColocataire({Key? key, required List<String> this.listColocataire, required this.listArticle, required this.updateViews}) : super(key: key);
 
   final List<String> listColocataire;
+  final List<Article> listArticle;
+  final Function updateViews;
 
   @override
   State<leftViewColocataire> createState() => _leftViewColocataireState();
@@ -31,6 +37,10 @@ class _leftViewColocataireState extends State<leftViewColocataire> {
     setState(() {
       DataManager.InsertColocs(textTyped);
       widget.listColocataire.add(textTyped);
+
+      for( Article element in widget.listArticle) {
+        element.updateNumberColocataire();
+      }
     });
   }
 
@@ -76,8 +86,14 @@ class _leftViewColocataireState extends State<leftViewColocataire> {
                       onPressed: () {
                         if (myTextController.text.isEmpty) return;
                         if (widget.listColocataire.contains(myTextController.text)) return;
-
                         addingColocataire(myTextController.text);
+
+                        for( Article element in widget.listArticle) {
+                          element.colocataire[myTextController.text] = false;
+                        }
+
+                        widget.updateViews();
+                        Navigator.pop(context, true);
                       },
                       child: const Text("Ajouter")
                   )
