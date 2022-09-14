@@ -1,5 +1,6 @@
 import 'package:gere_ta_coloc/article.dart';
 import 'package:gere_ta_coloc/colocs_class.dart';
+import 'package:gere_ta_coloc/data_manager.dart';
 import 'package:gere_ta_coloc/db_handler.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -24,7 +25,7 @@ class MathLogic {
     return colocCounter;
   }
 
-  static void updateColocOwnExpenses(List<Article> articleList, List<Colocs> colocsList) async{
+  static updateColocOwnExpenses(List<Article> articleList, List<Colocs> colocsList) async{
     int colocsCounter = 0;
 
     for(int i = 0; i < colocsList.length; i++) {
@@ -40,5 +41,7 @@ class MathLogic {
         }
       });
     });
+
+    DataManager.UpdateColocs(colocsList);
   }
 }

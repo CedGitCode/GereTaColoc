@@ -50,7 +50,7 @@ class _articleViewsState extends State<articleViews> {
                                             value: widget.listArticle[index].colocataire[nameofColoc[colocIndex]],
                                             onChanged: (bool? value) {
                                               widget.listArticle[index]
-                                                  .colocataire[nameofColoc[colocIndex]] = true;
+                                                  .colocataire[nameofColoc[colocIndex]] = value!;
                                               setState(() {
 
                                               });
@@ -71,7 +71,7 @@ class _articleViewsState extends State<articleViews> {
                                   TextButton(
                                       onPressed: ()  {
                                   MathLogic.updateColocOwnExpenses(widget.listArticle, widget.listColocataire);
-                                  //DataManager.UpdateAchats(widget.listArticle[index]);
+                                  DataManager.UpdateAchats(widget.listArticle);
                                   Navigator.pop(context, 'Cancel');
                                  },
                                       child: const Text("Annuler")
@@ -107,6 +107,7 @@ class _articleViewsState extends State<articleViews> {
                     icon: const Icon(Icons.cancel, color: Colors.black),
                     onPressed: () {
                       setState(() {
+                        DataManager.DeleteAchats(widget.listArticle[index].name);
                         widget.listArticle.removeAt(index);
                       });
                     }

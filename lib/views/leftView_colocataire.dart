@@ -4,6 +4,7 @@ import 'package:gere_ta_coloc/colocs_class.dart';
 import "package:gere_ta_coloc/data_manager.dart";
 import "package:gere_ta_coloc/article.dart";
 import 'package:gere_ta_coloc/dbg_class.dart';
+import 'package:gere_ta_coloc/math_logic.dart';
 import "package:gere_ta_coloc/views/articleViews.dart";
 
 class leftViewColocataire extends StatefulWidget {
@@ -136,8 +137,12 @@ class _leftViewColocataireState extends State<leftViewColocataire> {
                         icon: const Icon(Icons.cancel, color: Colors.red,),
                         onPressed: () {
                           setState(() {
+                            widget.listArticle.forEach((element) {
+                              element.colocataire.remove(widget.listColocataire[index].name);
+                            });
                             DataManager.DeleteColocs(widget.listColocataire[index].name);
                             widget.listColocataire.removeAt(index);
+                            DataManager.UpdateAllData(widget.listArticle, widget.listColocataire);
                           });
                         }
                     ),

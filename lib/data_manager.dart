@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:gere_ta_coloc/article.dart';
 import 'package:gere_ta_coloc/colocs_class.dart';
 import 'package:gere_ta_coloc/db_handler.dart';
+import 'package:gere_ta_coloc/math_logic.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -84,24 +85,37 @@ class DataManager {
     return list;
   }
 
-  static void UpdateAchats(Article article) async{
+  static UpdateColocs(List<Colocs> colocs) async{
+    Database? db = await DatabaseHelper.instance.database;
 
-    List<String> colocString = [];
-
-    article.colocataire.forEach((key, value) { {
-      if(value == true)
-      {
-        colocString.add(key);
-      }
-    }
+    colocs.forEach((element) {
+      print(db?.rawUpdate("UPDATE ${DatabaseHelper.table_colocs} SET ${DatabaseHelper.columnPriceToPayColocs} = ${element.expensesPerAchats} WHERE ${DatabaseHelper.columnNameColocs} = '${element.name}'"));
     });
+  }
+
+  static  UpdateAchats(List<Article> article) async{
 
     Database? db = await DatabaseHelper.instance.database;
-    Map<String, dynamic> row = {
-      DatabaseHelper.columnColocsAchats: colocString.toString().replaceAll('[', '').replaceAll(']','')
-    };
-    print(await db?.rawUpdate("UPDATE ${DatabaseHelper.table_achats} SET ${DatabaseHelper.columnColocsAchats} = '${colocString.toString().replaceAll('[', '').replaceAll(']','')}' WHERE ${DatabaseHelper.columnNameAchats} = '${article.name}'"));
+
+
+    article.forEach((element) { {
+      List<String> colocString = [];
+      element.colocataire.forEach((key, value) { {
+        if(value == true)
+        {
+            colocString.add(key);
+        }
+      }
+      });
+      print(db?.rawUpdate("UPDATE ${DatabaseHelper.table_achats} SET ${DatabaseHelper.columnColocsAchats} = '${colocString.toString().replaceAll('[', '').replaceAll(']','').replaceAll(' ', '').replaceAll(',', '-')}' WHERE ${DatabaseHelper.columnNameAchats} = '${element.name}'"));
+    }
+    });
       //print(await db?.update(DatabaseHelper.table_achats, row,  where: '${DatabaseHelper.columnNameAchats} = ?', whereArgs: [article.name]));
+  }
+
+  static UpdateAllData(List <Article> articleList, List<Colocs> colocsList) async{
+    await UpdateAchats(articleList);
+    await MathLogic.updateColocOwnExpenses(articleList, colocsList);
   }
 
   static void DeleteAchats(String name) async {
