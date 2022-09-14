@@ -100,7 +100,6 @@ class _leftViewColocataireState extends State<leftViewColocataire> {
 
                         widget.updateViews();
                         DebugInfos.printPerColocsExpenses(widget.listColocataire);
-                        Navigator.pop(context, true);
                       },
                       child: const Text("Ajouter")
                   )
@@ -116,10 +115,22 @@ class _leftViewColocataireState extends State<leftViewColocataire> {
                 separatorBuilder: (context, index) => const Divider(),
                 itemBuilder: (context, index) {
                   return ListTile(
-                    title: Text(
-                      widget.listColocataire[index].name,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    title:Row(
+                      children: <Widget> [
+
+                        Text(
+                        widget.listColocataire[index].name,
+                        textAlign: TextAlign.left,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                        Expanded(
+                            child:Text(
+                          "${widget.listColocataire[index].expensesPerAchats}\$",
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                          )
+                        ),
+                    ]
                     ),
                     trailing: IconButton(
                         icon: const Icon(Icons.cancel, color: Colors.red,),
