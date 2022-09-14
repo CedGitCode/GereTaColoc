@@ -1,14 +1,15 @@
 import "package:flutter/material.dart";
-import "package:provider/provider.dart";
+import 'package:gere_ta_coloc/colocs_class.dart';
 
 import "package:gere_ta_coloc/data_manager.dart";
 import "package:gere_ta_coloc/article.dart";
+import 'package:gere_ta_coloc/dbg_class.dart';
 import "package:gere_ta_coloc/views/articleViews.dart";
 
 class leftViewColocataire extends StatefulWidget {
-  const leftViewColocataire({Key? key, required List<String> this.listColocataire, required this.listArticle, required this.updateViews}) : super(key: key);
+  const leftViewColocataire({Key? key, required List<Colocs> this.listColocataire, required this.listArticle, required this.updateViews}) : super(key: key);
 
-  final List<String> listColocataire;
+  final List<Colocs> listColocataire;
   final List<Article> listArticle;
   final Function updateViews;
 
@@ -32,11 +33,14 @@ class _leftViewColocataireState extends State<leftViewColocataire> {
 
   void addingColocataire(String textTyped) {
     if (textTyped.isEmpty) return;
-    if (widget.listColocataire.contains(textTyped)) return;
+    widget.listColocataire.forEach((element) {
+      if(element.name == textTyped) return;
+    });
 
     setState(() {
-      DataManager.InsertColocs(textTyped);
-      widget.listColocataire.add(textTyped);
+      Colocs newColocs = Colocs(name: textTyped, expensesPerAchats: 0);
+      DataManager.InsertColocs(newColocs);
+      widget.listColocataire.add(newColocs);
 
       for( Article element in widget.listArticle) {
         element.updateNumberColocataire();
@@ -85,7 +89,9 @@ class _leftViewColocataireState extends State<leftViewColocataire> {
                   ElevatedButton(
                       onPressed: () {
                         if (myTextController.text.isEmpty) return;
-                        if (widget.listColocataire.contains(myTextController.text)) return;
+                        widget.listColocataire.forEach((element) {
+                          if(element.name == myTextController.text) return;
+                        });
                         addingColocataire(myTextController.text);
 
                         for( Article element in widget.listArticle) {
@@ -93,6 +99,7 @@ class _leftViewColocataireState extends State<leftViewColocataire> {
                         }
 
                         widget.updateViews();
+                        DebugInfos.printPerColocsExpenses(widget.listColocataire);
                         Navigator.pop(context, true);
                       },
                       child: const Text("Ajouter")
@@ -110,7 +117,7 @@ class _leftViewColocataireState extends State<leftViewColocataire> {
                 itemBuilder: (context, index) {
                   return ListTile(
                     title: Text(
-                      widget.listColocataire[index],
+                      widget.listColocataire[index].name,
                       textAlign: TextAlign.center,
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
@@ -118,7 +125,7 @@ class _leftViewColocataireState extends State<leftViewColocataire> {
                         icon: const Icon(Icons.cancel, color: Colors.red,),
                         onPressed: () {
                           setState(() {
-                            DataManager.DeleteColocs(widget.listColocataire[index]);
+                            DataManager.DeleteColocs(widget.listColocataire[index].name);
                             widget.listColocataire.removeAt(index);
                           });
                         }

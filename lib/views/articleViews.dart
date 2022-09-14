@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:gere_ta_coloc/data_manager.dart';
+import 'package:gere_ta_coloc/dbg_class.dart';
+import 'package:gere_ta_coloc/math_logic.dart';
+import 'package:gere_ta_coloc/article.dart';
+import 'package:gere_ta_coloc/colocs_class.dart';
 
 class articleViews extends StatefulWidget {
-  const articleViews({Key? key, required this.listArticle}) : super(key: key);
 
-  final listArticle;
+  const articleViews({Key? key, required  this.listColocataire, required this.listArticle}) : super(key: key);
+
+  final List<Colocs> listColocataire;
+  final List<Article> listArticle;
+
   @override
   State<articleViews> createState() => _articleViewsState();
 }
@@ -19,8 +27,7 @@ class _articleViewsState extends State<articleViews> {
           itemCount: widget.listArticle.length,
           separatorBuilder: (context, index) => const Divider(),
           itemBuilder: (context, index) {
-            List nameofColoc = widget.listArticle[index].colocataire.keys
-                .toList();
+            List nameofColoc = widget.listArticle[index].colocataire.keys.toList();
 
             return ListTile(
                 onTap: () =>
@@ -32,19 +39,20 @@ class _articleViewsState extends State<articleViews> {
                             builder: (context, StateSetter setState) {
                               return AlertDialog(
                                 title: Text("Colocataires"),
-                                content: ListView.separated(
+                                content: Container(
+                                    width: double.maxFinite,
+                                        child: ListView.separated(
                                     itemBuilder: (BuildContext context,
                                         int colocIndex) {
                                       return Row(
                                         children: [
                                           Checkbox(
-                                            value: widget.listArticle[index]
-                                                .colocataire[nameofColoc[colocIndex]],
+                                            value: widget.listArticle[index].colocataire[nameofColoc[colocIndex]],
                                             onChanged: (bool? value) {
+                                              widget.listArticle[index]
+                                                  .colocataire[nameofColoc[colocIndex]] = true;
                                               setState(() {
-                                                widget.listArticle[index]
-                                                    .colocataire[nameofColoc[colocIndex]] =
-                                                value!;
+
                                               });
                                             },
                                           ),
@@ -58,10 +66,14 @@ class _articleViewsState extends State<articleViews> {
                                         int index) => const Divider(),
                                     itemCount: widget.listArticle[index].colocataire.length
                                 ),
+                                ),
                                 actions: <Widget>[
                                   TextButton(
-                                      onPressed: () =>
-                                          Navigator.pop(context, 'Cancel'),
+                                      onPressed: ()  {
+                                  MathLogic.updateColocOwnExpenses(widget.listArticle, widget.listColocataire);
+                                  //DataManager.UpdateAchats(widget.listArticle[index]);
+                                  Navigator.pop(context, 'Cancel');
+                                 },
                                       child: const Text("Annuler")
                                   )
                                 ],

@@ -18,6 +18,7 @@ class DatabaseHelper {
 
   static final columnIdColocs = '_id';
   static final columnNameColocs = 'name';
+  static final columnPriceToPayColocs = 'ptp';
 
   // make this a singleton class
   DatabaseHelper._privateConstructor();
@@ -54,7 +55,8 @@ class DatabaseHelper {
     await db.execute('''
           CREATE TABLE $table_colocs (
             $columnIdColocs INTEGER PRIMARY KEY AUTOINCREMENT,
-            $columnNameColocs TEXT NOT NULL
+            $columnNameColocs TEXT NOT NULL,
+            $columnPriceToPayColocs DOUBLE NOT NULL
           )
           ''');
   }

@@ -2,9 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gere_ta_coloc/article.dart';
 import 'package:flutter/services.dart';
+import 'package:gere_ta_coloc/colocs_class.dart';
 import 'package:gere_ta_coloc/data_manager.dart';
 import 'package:gere_ta_coloc/views/leftView_colocataire.dart';
-import "package:provider/provider.dart";
 import "package:gere_ta_coloc/views/articleViews.dart";
 
 void main() {
@@ -17,16 +17,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider.value(
-          value:Article(" ", " ", {}),
-        )
-      ],
-      child: MaterialApp(
+    return MaterialApp(
         title:"Gère ta coloc",
-        home:MyHomePage(),
-      ),
+        home:MyHomePage()
     );
   }
 }
@@ -45,7 +38,7 @@ class _MyHomePage extends State<MyHomePage> {
 
   List<Widget> listViewChildren = [];
   List<Article> listViewArticle = [];
-  List<String> listColocataire = [];
+  List<Colocs> listColocataire = [];
 
 
   final nameTextController = TextEditingController();
@@ -55,14 +48,52 @@ class _MyHomePage extends State<MyHomePage> {
   void initState()
   {
     super.initState();
-    DataManager.fetchColocsFromDB();
 
-    Future<List<Map<String, Object?>>?> futurelist = DataManager.fetchColocsFromDB();
-    futurelist.then((value) {
-      if (value != null) value.forEach((item) => listColocataire.add(item.values.toString().replaceAll('(', '').replaceAll(')','')));
+    debugPrint("Je ne suis call qu'une fois");
+    List<String> colocsInfo = [];
+    List<String> achatsInfo = [];
+    List<String> newColocsList = [];
+    Map<String, bool> colocataireMap = { };
+
+    /*
+    Future<List<Map<String, Object?>>?> futureColocslist = DataManager.fetchColocsFromDB();
+    Future<List<Map<String, Object?>>?> futureAchatslist = DataManager.fetchAchatsFromDB();
+
+    futureColocslist.then((value) {
+      if (value != null) value.forEach((item) {
+        colocsInfo = item.values.toString().replaceAll('(', '')
+            .replaceAll(')', '')
+            .split(',');
+        listColocataire.add(Colocs(name: colocsInfo[1],
+            expensesPerAchats: double.parse(colocsInfo[2])));
+        colocataireMap[colocsInfo[1]] = false;
+      });
+    });
+
+    futureAchatslist.then((value) {
+      if (value != null) value.forEach((item) {
+        achatsInfo = item.values.toString().replaceAll('(', '').replaceAll(')','').split(',');
+        newColocsList = achatsInfo[3].replaceAll('[', '').replaceAll(']','').split(',');
+
+        newColocsList.forEach((element) {
+          if(colocataireMap.containsKey(element))
+            {
+              colocataireMap[element] = true;
+            }
+        });
+
+        listViewArticle.add(Article(achatsInfo[1], achatsInfo[2], colocataireMap));
+        colocataireMap.forEach((key, value) { {
+          value = false;
+        }
+        });
+      });
+
+*/
       actuallyLoading = true;
       setState(() {});
-    });
+    //});
+
   }
 
   void updateViews() {
@@ -86,7 +117,7 @@ class _MyHomePage extends State<MyHomePage> {
         appBar: AppBar(
           title: const Text("Gère ta Coloc"),
         ),
-        body:articleViews(listArticle: listViewArticle),
+        body:articleViews(listColocataire: listColocataire, listArticle: listViewArticle),
         floatingActionButton: FloatingActionButton(
             onPressed: () {
               showDialog<String>(
@@ -132,13 +163,12 @@ class _MyHomePage extends State<MyHomePage> {
                               Map<String, bool> colocataire = {};
 
                               listColocataire.forEach((element) {
-                                colocataire[element] = false;
+                                colocataire[element.name] = false;
                               });
 
-                              listViewArticle.add(Article(
-                                  nameTextController.text,
-                                  priceTextController.text, colocataire));
-                              DataManager.InsertAchats(nameTextController.text, priceTextController.text, "colocs");
+                              Article newArticle = Article(nameTextController.text, priceTextController.text, colocataire);
+                              listViewArticle.add(newArticle);
+                              DataManager.InsertAchats(newArticle);
                             })
                           },
                           child: const Text('Ajouter'),
