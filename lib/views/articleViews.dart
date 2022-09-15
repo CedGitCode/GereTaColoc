@@ -7,10 +7,11 @@ import 'package:gere_ta_coloc/colocs_class.dart';
 
 class articleViews extends StatefulWidget {
 
-  const articleViews({Key? key, required  this.listColocataire, required this.listArticle}) : super(key: key);
+  const articleViews({Key? key, required  this.listColocataire, required this.listArticle, required this.updateViews}) : super(key: key);
 
   final List<Colocs> listColocataire;
   final List<Article> listArticle;
+  final Function updateViews;
 
   @override
   State<articleViews> createState() => _articleViewsState();
@@ -74,7 +75,7 @@ class _articleViewsState extends State<articleViews> {
                                   DataManager.UpdateAchats(widget.listArticle);
                                   Navigator.pop(context, 'Cancel');
                                  },
-                                      child: const Text("Annuler")
+                                      child: const Text("Quitter")
                                   )
                                 ],
                               );
@@ -109,6 +110,7 @@ class _articleViewsState extends State<articleViews> {
                       setState(() {
                         DataManager.DeleteAchats(widget.listArticle[index].name);
                         widget.listArticle.removeAt(index);
+                        widget.updateViews();
                       });
                     }
                 )

@@ -4,6 +4,7 @@ import 'package:gere_ta_coloc/article.dart';
 import 'package:flutter/services.dart';
 import 'package:gere_ta_coloc/colocs_class.dart';
 import 'package:gere_ta_coloc/data_manager.dart';
+import 'package:gere_ta_coloc/math_logic.dart';
 import 'package:gere_ta_coloc/views/leftView_colocataire.dart';
 import "package:gere_ta_coloc/views/articleViews.dart";
 
@@ -49,7 +50,6 @@ class _MyHomePage extends State<MyHomePage> {
   {
     super.initState();
 
-    debugPrint("Je ne suis call qu'une fois");
     List<Object?> colocsInfo = [];
     List<Object?> achatsInfo = [];
     List<String> newColocsList = [];
@@ -113,7 +113,7 @@ class _MyHomePage extends State<MyHomePage> {
         appBar: AppBar(
           title: const Text("Gère ta Coloc"),
         ),
-        body:articleViews(listColocataire: listColocataire, listArticle: listViewArticle),
+        body:articleViews(listColocataire: listColocataire, listArticle: listViewArticle, updateViews: updateViews),
         floatingActionButton: FloatingActionButton(
             onPressed: () {
               showDialog<String>(
@@ -148,7 +148,11 @@ class _MyHomePage extends State<MyHomePage> {
                       ),
                       actions: <Widget>[
                         TextButton(
-                          onPressed: () => Navigator.pop(context, 'Cancel'),
+                          onPressed: () {
+                            Navigator.pop(context, 'Cancel');
+                            nameTextController.clear();
+                            priceTextController.clear();
+                          },
                           child: const Text('Annuler'),
                         ),
                         TextButton(
@@ -159,12 +163,16 @@ class _MyHomePage extends State<MyHomePage> {
                               Map<String, bool> colocataire = {};
 
                               listColocataire.forEach((element) {
-                                colocataire[element.name] = false;
+                                colocataire[element.name] = true;
                               });
 
                               Article newArticle = Article(nameTextController.text, priceTextController.text, colocataire);
                               listViewArticle.add(newArticle);
                               DataManager.InsertAchats(newArticle);
+                              nameTextController.clear();
+                              priceTextController.clear();
+
+                              MathLogic.updateColocOwnExpenses(listViewArticle, listColocataire);
                             })
                           },
                           child: const Text('Ajouter'),
@@ -177,6 +185,23 @@ class _MyHomePage extends State<MyHomePage> {
             },
             tooltip: 'Ajout Nourritures',
             child: const Icon(Icons.add)
+        ),
+        bottomNavigationBar: BottomAppBar(
+          child:Container(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height * 0.1,
+            color: Colors.blue,
+            child:Padding(
+              padding: EdgeInsets.fromLTRB(0, 20, 0, 0),
+              child:Text(
+              "Prix total: ${MathLogic.getTotalPrice(listViewArticle).toStringAsFixed(2)}\$",
+              style:const TextStyle(
+                fontSize: 22
+              ),
+              textAlign: TextAlign.center,
+            )
+            )
+          )
         ),
       );
     }

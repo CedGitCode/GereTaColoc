@@ -5,7 +5,7 @@ import 'package:gere_ta_coloc/db_handler.dart';
 import 'package:sqflite/sqflite.dart';
 
 class MathLogic {
-  static Future<double> getTotalPrice(List<Article> articlelist) async{
+  static double getTotalPrice(List<Article> articlelist) {
 
     double finalResult = 0;
 
