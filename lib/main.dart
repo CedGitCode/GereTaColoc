@@ -50,8 +50,8 @@ class _MyHomePage extends State<MyHomePage> {
     super.initState();
 
     debugPrint("Je ne suis call qu'une fois");
-    List<String> colocsInfo = [];
-    List<String> achatsInfo = [];
+    List<Object?> colocsInfo = [];
+    List<Object?> achatsInfo = [];
     List<String> newColocsList = [];
     Map<String, bool> colocataireMap = {};
 
@@ -61,20 +61,18 @@ class _MyHomePage extends State<MyHomePage> {
 
     futureColocslist.then((value) {
       if (value != null) value.forEach((item) {
-        colocsInfo = item.values.toString().replaceAll('(', '')
-            .replaceAll(')', '').replaceAll(' ', '')
-            .split(',');
-        listColocataire.add(Colocs(name: colocsInfo[1],
-            expensesPerAchats: double.parse(colocsInfo[2])));
-        colocataireMap[colocsInfo[1]] = false;
+        colocsInfo = item.values.toList();
+        listColocataire.add(Colocs(name: colocsInfo[1].toString(),
+            expensesPerAchats: double.parse(colocsInfo[2].toString())));
+        colocataireMap[colocsInfo[1].toString()] = false;
       });
     });
 
     futureAchatslist.then((value) {
       if (value != null) value.forEach((item) {
         Map<String, bool> newMap = Map.from(colocataireMap);
-        achatsInfo = item.values.toString().replaceAll('(', '').replaceAll(')','').split(',');
-        newColocsList = achatsInfo[3].replaceAll(' ', '').split('-');
+        achatsInfo = item.values.toList();
+        newColocsList = achatsInfo[3].toString().replaceAll(' ', '').split(',');
 
         newColocsList.forEach((element) {
           if(newMap.containsKey(element))
@@ -82,7 +80,7 @@ class _MyHomePage extends State<MyHomePage> {
               newMap[element] = true;
             }
         });
-        Article newArticle = Article(achatsInfo[1], achatsInfo[2], newMap);
+        Article newArticle = Article(achatsInfo[1].toString(), achatsInfo[2].toString(), newMap);
         listViewArticle.add(newArticle);
 
       });

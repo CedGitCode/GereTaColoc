@@ -107,7 +107,9 @@ class DataManager {
         }
       }
       });
-      print(db?.rawUpdate("UPDATE ${DatabaseHelper.table_achats} SET ${DatabaseHelper.columnColocsAchats} = '${colocString.toString().replaceAll('[', '').replaceAll(']','').replaceAll(' ', '').replaceAll(',', '-')}' WHERE ${DatabaseHelper.columnNameAchats} = '${element.name}'"));
+      print(db?.rawUpdate("UPDATE ${DatabaseHelper.table_achats} SET ${DatabaseHelper.columnColocsAchats} = '${colocString.toString().replaceAll('[', '').replaceAll(']','')}' WHERE ${DatabaseHelper.columnNameAchats} = '${element.name}'"));
+
+      //print(db?.rawUpdate("UPDATE ${DatabaseHelper.table_achats} SET ${DatabaseHelper.columnColocsAchats} = '${colocString.toString().replaceAll('[', '').replaceAll(']','').replaceAll(' ', '').replaceAll(',', '-')}' WHERE ${DatabaseHelper.columnNameAchats} = '${element.name}'"));
     }
     });
       //print(await db?.update(DatabaseHelper.table_achats, row,  where: '${DatabaseHelper.columnNameAchats} = ?', whereArgs: [article.name]));
@@ -123,7 +125,7 @@ class DataManager {
     // because this is an expensive operation we use async and await
     Database? db = await DatabaseHelper.instance.database;
 
-    print(await db?.delete(DatabaseHelper.table_colocs, where: '${DatabaseHelper.columnNameAchats} = ?', whereArgs: [name]));
+    print(await db?.delete(DatabaseHelper.table_achats, where: '${DatabaseHelper.columnNameAchats} = ?', whereArgs: [name]));
 
   }
 }
