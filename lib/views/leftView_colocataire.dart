@@ -144,6 +144,7 @@ class _leftViewColocataireState extends State<leftViewColocataire> {
                             widget.listColocataire.removeAt(index);
                             DataManager.UpdateAllData(widget.listArticle, widget.listColocataire);
                           });
+                          widget.updateViews();
                         }
                     ),
                   );

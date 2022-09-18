@@ -19,6 +19,9 @@ class articleViews extends StatefulWidget {
 
 class _articleViewsState extends State<articleViews> {
 
+  void updateViews() {
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,9 +55,7 @@ class _articleViewsState extends State<articleViews> {
                                             onChanged: (bool? value) {
                                               widget.listArticle[index]
                                                   .colocataire[nameofColoc[colocIndex]] = value!;
-                                              setState(() {
-
-                                              });
+                                              setState(() {});
                                             },
                                           ),
                                           Text(
@@ -71,10 +72,11 @@ class _articleViewsState extends State<articleViews> {
                                 actions: <Widget>[
                                   TextButton(
                                       onPressed: ()  {
-                                  MathLogic.updateColocOwnExpenses(widget.listArticle, widget.listColocataire);
-                                  DataManager.UpdateAchats(widget.listArticle);
-                                  Navigator.pop(context, 'Cancel');
-                                 },
+                                        MathLogic.updateColocOwnExpenses(widget.listArticle, widget.listColocataire);
+                                        DataManager.UpdateAchats(widget.listArticle);
+                                        Navigator.pop(context, 'Cancel');
+                                        updateViews();
+                                        },
                                       child: const Text("Quitter")
                                   )
                                 ],
@@ -92,7 +94,7 @@ class _articleViewsState extends State<articleViews> {
                     color: Colors.black,
                     borderRadius: BorderRadius.circular(50),
                   ),
-                  child: Text("${widget.listArticle[index].colocataire.length}",
+                  child: Text("${widget.listArticle[index].getColoc()}",
                       style: TextStyle(fontWeight: FontWeight.bold,
                           color: Colors.white)),
                 ),
