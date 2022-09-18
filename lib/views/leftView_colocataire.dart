@@ -22,21 +22,16 @@ class _leftViewColocataireState extends State<leftViewColocataire> {
 
   final myTextController = TextEditingController();
 
+  int addingColocataire(String textTyped, int p_index) {
+    if (textTyped.isEmpty) return 0;
 
- /* void addingColocataireInListView(String textTyped) {
-    if (textTyped.isEmpty) return;
-    if (widget.listColocataire.contains(textTyped)) return;
-
-    setState(() {
-      widget.listColocataire.add(textTyped);
-    });
-  }*/
-
-  void addingColocataire(String textTyped) {
-    if (textTyped.isEmpty) return;
+    int index = 0;
     widget.listColocataire.forEach((element) {
-      if(element.name == textTyped) return;
+      if( element.name != textTyped){
+        index++;
+      }
     });
+    if (index != p_index) return 0;
 
     setState(() {
       Colocs newColocs = Colocs(name: textTyped, expensesPerAchats: 0);
@@ -47,6 +42,8 @@ class _leftViewColocataireState extends State<leftViewColocataire> {
         element.updateNumberColocataire();
       }
     });
+
+    return 1;
   }
 
   @override
@@ -89,18 +86,20 @@ class _leftViewColocataireState extends State<leftViewColocataire> {
                   ),
                   ElevatedButton(
                       onPressed: () {
-                        if (myTextController.text.isEmpty) return;
-                        widget.listColocataire.forEach((element) {
-                          if(element.name == myTextController.text) return;
-                        });
-                        addingColocataire(myTextController.text);
 
-                        for( Article element in widget.listArticle) {
-                          element.colocataire[myTextController.text] = false;
+                        int index = 0;
+                        widget.listColocataire.forEach((element) {index++;});
+                        int getStatus = addingColocataire(myTextController.text, index);
+
+                        if (getStatus == 1) {
+                          for( Article element in widget.listArticle) {
+                            element.colocataire[myTextController.text] = false;
+                          }
+
+                          widget.updateViews();
+                          DebugInfos.printPerColocsExpenses(widget.listColocataire);
+                          myTextController.clear();
                         }
-
-                        widget.updateViews();
-                        DebugInfos.printPerColocsExpenses(widget.listColocataire);
                       },
                       child: const Text("Ajouter")
                   )

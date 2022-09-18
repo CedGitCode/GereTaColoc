@@ -164,22 +164,27 @@ class _MyHomePage extends State<MyHomePage> {
                         TextButton(
                           onPressed: () =>
                           {
-                            Navigator.pop(context, 'OK'),
-                            setState(() {
-                              Map<String, bool> colocataire = {};
+                            if (priceTextController.text.isNotEmpty && nameTextController.text.isNotEmpty) {
+                              Navigator.pop(context, 'OK'),
+                              setState(() {
+                                Map<String, bool> colocataire = {};
 
-                              listColocataire.forEach((element) {
-                                colocataire[element.name] = true;
-                              });
+                                listColocataire.forEach((element) {
+                                  colocataire[element.name] = true;
+                                });
 
-                              Article newArticle = Article(nameTextController.text, priceTextController.text, colocataire);
-                              listViewArticle.add(newArticle);
-                              DataManager.InsertAchats(newArticle);
-                              nameTextController.clear();
-                              priceTextController.clear();
+                                Article newArticle = Article(
+                                    nameTextController.text,
+                                    priceTextController.text, colocataire);
+                                listViewArticle.add(newArticle);
+                                DataManager.InsertAchats(newArticle);
+                                nameTextController.clear();
+                                priceTextController.clear();
 
-                              MathLogic.updateColocOwnExpenses(listViewArticle, listColocataire);
-                            })
+                                MathLogic.updateColocOwnExpenses(
+                                    listViewArticle, listColocataire);
+                              })
+                            }
                           },
                           child: const Text('Ajouter'),
                         ),

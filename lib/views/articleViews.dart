@@ -95,7 +95,7 @@ class _articleViewsState extends State<articleViews> {
                     borderRadius: BorderRadius.circular(50),
                   ),
                   child: Text("${widget.listArticle[index].getColoc()}",
-                      style: TextStyle(fontWeight: FontWeight.bold,
+                      style: const TextStyle(fontWeight: FontWeight.bold,
                           color: Colors.white)),
                 ),
 
