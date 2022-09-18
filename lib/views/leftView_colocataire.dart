@@ -126,9 +126,9 @@ class _leftViewColocataireState extends State<leftViewColocataire> {
                       ),
                         Expanded(
                             child:Text(
-                          "${widget.listColocataire[index].expensesPerAchats.toStringAsFixed(2)}\$",
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                              "${widget.listColocataire[index].expensesPerAchats.toStringAsFixed(2)}\$",
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(fontWeight: FontWeight.bold),
                           )
                         ),
                     ]

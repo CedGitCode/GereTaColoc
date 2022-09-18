@@ -113,6 +113,7 @@ class _articleViewsState extends State<articleViews> {
                         DataManager.DeleteAchats(widget.listArticle[index].name);
                         widget.listArticle.removeAt(index);
                         widget.updateViews();
+                        MathLogic.updateColocOwnExpenses(widget.listArticle, widget.listColocataire);
                       });
                     }
                 )
