@@ -47,7 +47,6 @@ class _MyHomePage extends State<MyHomePage> {
   List<Article> listViewArticle = [];
   List<Colocs> listColocataire = [];
 
-
   final nameTextController = TextEditingController();
   final priceTextController = TextEditingController();
 
@@ -122,6 +121,9 @@ class _MyHomePage extends State<MyHomePage> {
         body:articleViews(listColocataire: listColocataire, listArticle: listViewArticle, updateViews: updateViews),
         floatingActionButton: FloatingActionButton(
             onPressed: () {
+              nameTextController.clear();
+              priceTextController.clear();
+
               showDialog<String>(
                 context: context,
                 builder: (BuildContext context) =>
@@ -156,8 +158,6 @@ class _MyHomePage extends State<MyHomePage> {
                         TextButton(
                           onPressed: () {
                             Navigator.pop(context, 'Cancel');
-                            nameTextController.clear();
-                            priceTextController.clear();
                           },
                           child: const Text('Annuler'),
                         ),
@@ -173,26 +173,19 @@ class _MyHomePage extends State<MyHomePage> {
                                   colocataire[element.name] = true;
                                 });
 
-                                Article newArticle = Article(
-                                    nameTextController.text,
-                                    priceTextController.text, colocataire);
+                                Article newArticle = Article(nameTextController.text, priceTextController.text, colocataire);
                                 listViewArticle.add(newArticle);
                                 DataManager.InsertAchats(newArticle);
-                                nameTextController.clear();
-                                priceTextController.clear();
 
-                                MathLogic.updateColocOwnExpenses(
-                                    listViewArticle, listColocataire);
+                                MathLogic.updateColocOwnExpenses(listViewArticle, listColocataire);
                               })
                             }
                           },
                           child: const Text('Ajouter'),
                         ),
                       ],
-
                     ),
               );
-              //Navigator.push(context, MaterialPageRoute(builder: (context) => Article()) );
             },
             tooltip: 'Ajout Nourritures',
             child: const Icon(Icons.add)
@@ -218,7 +211,7 @@ class _MyHomePage extends State<MyHomePage> {
     }
     else {
       return Scaffold(
-        body:Text("JE CHARGE CONNARD GROS FILS DE PUTE \n"),
+        body:Text("JE CHARGE \n"),
       );
     }
 
