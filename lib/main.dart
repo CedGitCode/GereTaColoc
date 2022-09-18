@@ -7,8 +7,14 @@ import 'package:gere_ta_coloc/data_manager.dart';
 import 'package:gere_ta_coloc/math_logic.dart';
 import 'package:gere_ta_coloc/views/leftView_colocataire.dart';
 import "package:gere_ta_coloc/views/articleViews.dart";
+import 'package:flutter/services.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations(
+    [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]
+  );
+
   runApp(const MyApp());
 }
 
